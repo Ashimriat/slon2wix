@@ -1,0 +1,20 @@
+{
+  "name": "slon2wix_extension",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:dev": "webpack --config webpack.config.js --mode=development --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "exceljs": "^4.2.0"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^6.1.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
