@@ -69,6 +69,7 @@ const obtainTeaInfo = () => {
 	}
 	
 	res.description = descriptionTexts.join(' ');
+	if (!Object.keys(res.howToCook).length) delete res.howToCook;
 	
 	return res;
 };
@@ -140,6 +141,7 @@ const obtainCoffeeInfo = () => {
 	}
 	
 	res.description = descriptionTexts.join(' ');
+	if (!Object.keys(res.howToCook).length) delete res.howToCook;
 	
 	return res;
 };
