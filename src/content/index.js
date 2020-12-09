@@ -1,7 +1,7 @@
 import {MESSAGES, ITEMS_TYPES_SELECTORS, WIX_SELECTORS} from '../constants';
 import { getInfoFromRoute } from './routeProcessor';
 import { uploadItemsCategory } from './itemUploader';
-import { clickElement, makeTimestamp} from '../background/utils';
+import { clickElement, makeTimestamp } from '../utils';
 
 
 chrome.runtime.onMessage.addListener(async ({ type, info }, sender, sendResponse) => {

@@ -14,33 +14,14 @@ module.exports = (env, arg) => ({
 	devtool: 'source-map',
 	module: {
 		rules: [
-			// TODO: бабелизировать
-			/*
 			{
-				test: /\.tsx?$/,
-				use: {
-					loader: 'ts-loader',
-					options: {
-						appendTsSuffixTo: [/\.vue$/]
-					}
-				},
+				test: /\.js?$/,
+				exclude: /node_modules/,
+				use: 'babel-loader'
 			},
-		  */
 		],
 	},
 	plugins: [
-		/*
-		new HtmlWebpackPlugin({
-			title: 'Popup',
-			filename: 'popup.html',
-			templateParameters: {
-				tags: {
-					headTags: [],
-					bodyTags: []
-				}
-			}
-		}),
-		*/
 		new CopyWebpackPlugin({
 			patterns: [
 				{

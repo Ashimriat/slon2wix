@@ -67,27 +67,27 @@ export const SWEETS_INFO_CATEGORIES_REGEXP = /(Состав|Условия хр�
 
 export const TABLEWARE_INFO_CATEGORIES_REGEXP = /^Объ(е|ё)м:/;
 
-export const UPLOAD_STAGES = {
-	PROCESSING_TO_UPLOAD: 'PROCESSING_TO_UPLOAD',
-	UPLOADING: 'UPLOADING'
-};
-
 export const WIX_SELECTORS = {
 	SHOP_ITEMS_CATEGORY: '[data-hook="store-products"]',
 	ADD_ITEM: '.add-product-button-container > dropdown-button > button',
 	ADD_PHYSICAL_ITEM: '[data-hook="option-physical"] > div > div',
 	PRODUCT_NAME_INPUT: '[data-hook="product-title"]',
-	PRODUCT_DESCRIPTION_INPUT: '.modal-content > .row > .ck-editor-wrapper > w-text-editor > div:last-child',
+	PRODUCT_DESCRIPTION_INPUT: '[name="description"] > div:last-child',
+	PRODUCT_DESCRIPTION_BOLD_BUTTON: '[name="description"] .button.bold',
 	ADDITIONAL_INFO_BUTTON: '.add-additional-info > a',
 	ADDITIONAL_INFO_TITLE: '[data-hook="additional-info-title-input"]',
 	ADDITIONAL_INFO_DESCRIPTION: '[name="infoDescription"] > div:last-child',
+	ADDITIONAL_INFO_DESCRIPTION_BOLD_BUTTON: '[name="infoDescription"] .button.bold',
 	ADDITIONAL_INFO_SAVE_BUTTON: '[data-hook="additional-info-save"]',
 	ADD_IMAGE_BUTTON: '[data-hook="option-PHOTO"] > div > div',
-	IMAGES_FOLDERS_LIST: '[data-hook="generic-layout-items-list-wrapper"]',
+	
+	PHOTO_GALLERY_FRAME: '#mediaGalleryFrame',
+	IMAGES_FOLDERS_LIST: '[data-hook="gallery-layout"]',
 	IMAGES_FOLDERS: '[data-hook="generic-layout-items-list-wrapper"] > li > div',
 	IMAGES_FOLDER_NAME: '[data-hook="gallery-folder-name"]',
 	
 	CREATE_NEW_IMAGE_FOLDER_BUTTON: '[data-hook="action-item"]',
+	NEW_IMAGE_FOLDER_NAME_INPUT: '[data-hook="gallery-layout"] ul input',
 	
 	ADD_IMAGE_MODAL_BUTTON: '[data-hook="add-media-button"]',
 	ADD_IMAGE_BY_LINK_BUTTON: '[data-hook="source-link-item-wrapper"]',
