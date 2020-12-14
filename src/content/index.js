@@ -8,8 +8,10 @@ chrome.runtime.onMessage.addListener(async ({ type, info }, sender, sendResponse
 	switch (type) {
 		case MESSAGES.OBTAIN_ITEM_INFO:
 			if (document.querySelector(ITEMS_TYPES_SELECTORS.error404)) {
+				console.log("PROCESSING ERROR");
 				sendResponse({ info: 'error' });
 			} else {
+				console.log("PROCESSING INFO");
 				sendResponse({ info: getInfoFromRoute() });
 			}
 			break;

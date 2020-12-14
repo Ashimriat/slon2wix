@@ -27,7 +27,7 @@ const uploadItemsInfo = async () => {
 			// await tmpPromiseObj.prom;
 			//for (let category of itemsData) {
 			log("LOADING CATEGORY");
-				await uploadCategory(itemsData[0])
+				await uploadCategory(itemsData[11])
 			//}
 		});
 	});

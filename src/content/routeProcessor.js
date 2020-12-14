@@ -1,3 +1,4 @@
+import { formatItemName } from '../utils';
 import {
 	ITEMS_TYPES_SELECTORS, SECTIONS_NAMES,
 	COFFEE_COOK_CATEGORIES, COFFEE_COOK_CATEGORIES_REGEXP,
@@ -69,8 +70,9 @@ const obtainTeaInfo = () => {
 	}
 	
 	res.description = descriptionTexts.join(' ');
-	if (!Object.keys(res.howToCook).length) delete res.howToCook;
 	
+	if (res.howToCook && !Object.keys(res.howToCook).length) delete res.howToCook;
+	res.name = formatItemName(res.name);
 	return res;
 };
 
@@ -88,7 +90,9 @@ const obtainCoffeeInfo = () => {
 	
 	
 	let howToCookNode = descriptionNode.lastElementChild;
-	let tmpNode, tmpNodeText, tmpMatch;
+	let tmpNode,
+			tmpNodeText,
+			tmpMatch;
 	if (howToCookNode) {
 		res.howToCook = {};
 		for (let i = 0; i < howToCookNode.childElementCount; i++) {
@@ -106,8 +110,8 @@ const obtainCoffeeInfo = () => {
 	}
 	
 	let descriptionTexts = [],
-		isLastNode = false,
-		clonedNode;
+			isLastNode = false,
+			clonedNode;
 	tmpNodeText = null;
 	tmpMatch = null;
 	
@@ -141,8 +145,9 @@ const obtainCoffeeInfo = () => {
 	}
 	
 	res.description = descriptionTexts.join(' ');
-	if (!Object.keys(res.howToCook).length) delete res.howToCook;
 	
+	if (res.howToCook && !Object.keys(res.howToCook).length) delete res.howToCook;
+	res.name = formatItemName(res.name, false);
 	return res;
 };
 
@@ -200,7 +205,7 @@ const obtainTablewareInfo = () => {
 	}
 	
 	res.description = descriptionTexts.join(' ');
-	
+	res.name = formatItemName(res.name);
 	return res;
 };
 
@@ -229,7 +234,7 @@ const obtainSweetsInfo = () => {
 		}
 		res.description = descriptionTexts.join(' ');
 	}
-	
+	res.name = formatItemName(res.name);
 	return res;
 };
 

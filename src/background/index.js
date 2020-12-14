@@ -36,6 +36,7 @@ chrome.pageAction.onClicked.addListener(async tab => {
 			fileData = await obtainProductsInfo();
 			localStorage.setItem('itemsData', JSON.stringify(fileData));
 		}
+		console.log("GOT DATA", fileData);
 	} else if (url.match(HOST.WIX)) {
 		await uploadInfo(tab.id, fileData);
 	}

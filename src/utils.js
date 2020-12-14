@@ -19,13 +19,14 @@ export const getLastModifyDate = async () => await new Promise(resolve => {
 	});
 });
 
-const elementTrack = async (selector, appearCheck) => await new Promise(resolve => {
+const elementTrack = async (selector, appearCheck, contextDocument = document) => await new Promise(resolve => {
 	let timerId;
 	const tracker = async () => {
-		let condition = document.querySelector(selector);
+		console.log("TRACKING", selector);
+		let condition = contextDocument.querySelector(selector);
 		if (!appearCheck) condition = !condition;
 		if (!condition) {
-			timerId = setTimeout(tracker, 500);
+			timerId = setTimeout(tracker,500);
 		} else {
 			clearTimeout(timerId);
 			await makeBreak(1);
@@ -35,14 +36,13 @@ const elementTrack = async (selector, appearCheck) => await new Promise(resolve 
 	tracker();
 });
 
+export const awaitElementAppear = async (selector, contextDocument) => await elementTrack(selector, true, contextDocument);
 
-export const awaitElementAppear = async (selector) => await elementTrack(selector, true);
+export const awaitElementDisappear = async (selector, contextDocument) => await elementTrack(selector, false, contextDocument);
 
-export const awaitElementDisappear = async (selector) => await elementTrack(selector, false);
-
-export const clickElement = (selector) => {
-	console.log(document.querySelector(selector));
-	document.querySelector(selector).click();
+export const clickElement = (selector, contextDocument = document) => {
+	console.log(contextDocument.querySelector(selector));
+	contextDocument.querySelector(selector).click();
 };
 
 export const makeTimestamp = () => {
@@ -54,14 +54,23 @@ export const makeTimestamp = () => {
 	return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
 
-export const setValue = (selector, value, options) => {
-	const element = document.querySelector(selector);
-	console.log(selector, element, value, options);
+export const setValue = (selector, value, options, contextDocument = document) => {
+	const element = contextDocument.querySelector(selector);
 	const isFormElement = ['INPUT', 'TEXTAREA'].includes(element.tagName);
 	const propertyToSet = isFormElement ? 'value' : 'innerHTML';
 	element[propertyToSet] = value;
 	if (isFormElement) {
-		element.dispatchEvent(new Event('change'));
+		let events = ['change'];
+		if (options?.emulatedEvent) {
+			events = Array.isArray(options.emulatedEvent) ? options.emulatedEvent : [options.emulatedEvent];
+		}
+		for (let event of events) {
+			element.dispatchEvent(new Event(event, {
+				composed: true,
+				bubbles: true,
+				cancelable: true
+			}));
+		}
 	}
 	if (options?.emulatedButtonSelector) {
 		clickElement(options.emulatedButtonSelector);
@@ -82,7 +91,11 @@ export const makeBreak = async secondsAmount => await new Promise(resolve => {
 	}, 1000);
 });
 
-export const trickKeyboardTracking = (selector, key) => {
-	// некоторые инпуты считаются невалидными, если в них не была нажата клавиша
-	document.querySelector(ADDITIONAL_INFO_TITLE)
-}
+export const formatItemName = (src, withTrim = true) => {
+	let res = src;
+	if (res.charAt(res.length - 1) === '.') {
+		res = res.substring(0, res.length - 1);
+	}
+	res = res.replace(/"/g, "'");
+	return withTrim ? res.trim(): res;
+};

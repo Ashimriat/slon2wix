@@ -8,8 +8,6 @@ export const STORAGE_KEYS = {
 	LAST_MODIFIED: 'slon_last_modified'
 };
 
-export const PORT_NAME = 'SLON_2_WIX';
-
 export const MESSAGES = {
 	OBTAIN_ITEM_INFO: 'OBTAIN_ITEM_INFO',
 	PREPARE_FOR_CATEGORY_UPLOAD: 'PREPARE_FOR_CATEGORY_UPLOAD',
@@ -23,14 +21,6 @@ export const SLON_ROUTES = {
 	TABLEWARE: '/posuda_i_aksessuari',
 	SWEETS: '/sladosti'
 };
-
-export const SERVER_ROUTES = {
-	PARSE_INFO_FILE: '/getInfo'
-};
-
-export const CONTENT_TABLE_SELECTOR = '#product-list > .row > .col.s12.m8.l9 > ul.row';
-
-export const ITEM_SELECTOR = 'li > div > a';
 
 export const COFFEE_COOK_CATEGORIES = {
 	'Эспрессо': 'espresso',
@@ -67,13 +57,52 @@ export const SWEETS_INFO_CATEGORIES_REGEXP = /(Состав|Условия хр�
 
 export const TABLEWARE_INFO_CATEGORIES_REGEXP = /^Объ(е|ё)м:/;
 
+export const EVENTS = {
+	KEYBOARD: {
+		ENTER: new KeyboardEvent('keydown', {
+			key: 'Enter',
+			code: 'Enter',
+			charCode: 0,
+			keyCode: 13,
+			which: 13,
+			composed: true,
+			bubbles: true,
+			cancelable: true
+		}),
+	},
+	MOUSE: {
+		CLICK: new MouseEvent('click', {
+			view: window,
+			bubbles: true,
+			cancelable: true
+		}),
+		DOUBLE_CLICK: new MouseEvent('dblclick', {
+			view: window,
+			bubbles: true,
+			cancelable: true
+		}),
+	}
+};
+
 export const WIX_SELECTORS = {
 	SHOP_ITEMS_CATEGORY: '[data-hook="store-products"]',
 	ADD_ITEM: '.add-product-button-container > dropdown-button > button',
 	ADD_PHYSICAL_ITEM: '[data-hook="option-physical"] > div > div',
+	// имя
 	PRODUCT_NAME_INPUT: '[data-hook="product-title"]',
+	// цена
+	PRODUCT_PRICE_INPUT: '[name="price"]',
+	ADDITIONAL_PRICE_INFO_INPUT: '[data-hook="unit-price-container"] input',
+	TOTAL_AMOUNT_INPUT: '[data-hook="total-unit-form-field"] [data-hook="total-quantity-input"] > div > input',
+	TOTAL_AMOUNT_TYPE_INPUT: '[data-hook="total-unit-form-field"] [data-hook="total-unit-dropdown"] > div > div > div > div > input',
+	BASE_AMOUNT_INPUT: '[data-hook="base-unit-form-field"] [data-hook="base-quantity-input"] > div > input',
+	BASE_AMOUNT_TYPE_INPUT: '[data-hook="base-unit-form-field"] [data-hook="base-unit-dropdown"] > div > div > div > div > input',
+	KILO_OPTION: '[data-hook="popover-content"] [data-hook="dropdown-item-kg"]',
+	GRAM_OPTION: '[data-hook="popover-content"] [data-hook="dropdown-item-g"]',
+	// описание
 	PRODUCT_DESCRIPTION_INPUT: '[name="description"] > div:last-child',
 	PRODUCT_DESCRIPTION_BOLD_BUTTON: '[name="description"] .button.bold',
+	// доп инфа (как готовить, кислотность)
 	ADDITIONAL_INFO_BUTTON: '.add-additional-info > a',
 	ADDITIONAL_INFO_TITLE: '[data-hook="additional-info-title-input"]',
 	ADDITIONAL_INFO_DESCRIPTION: '[name="infoDescription"] > div:last-child',
@@ -95,7 +124,9 @@ export const WIX_SELECTORS = {
 	IMPORT_IMAGE_BUTTON: '[data-hook="url-importer-import-button"]',
 	IMAGE_UPLOAD_TRACKER: '[data-hook="add-media-panel-header-title"]',
 	LAST_UPLOADED_IMAGE: '[data-hook="gallery-file"]:last-child',
+	IMAGE_TILE: '[data-hook="gallery-file-name"]',
 	IMAGE_NAME: '[data-hook="gallery-file-name"] > div',
+	IMAGE_NAME_INPUT: '[data-hook="gallery-file-name-edit-input"] > div > input',
 	ADD_IMAGE_TO_INFO_BUTTON: '[data-hook="select-items"]',
 	
 	SAVE_ITEM_INFO_BUTTON: '[data-hook="product-save"]'

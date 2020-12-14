@@ -1,5 +1,5 @@
-import { awaitElementAppear, makeBreak, clickElement, setValue, log } from '../utils';
-import { WIX_SELECTORS } from '../constants';
+import { awaitElementAppear, makeBreak, clickElement, trackPropertyChange, setValue, log } from '../utils';
+import { WIX_SELECTORS, EVENTS } from '../constants';
 
 
 const {
@@ -7,91 +7,103 @@ const {
 	IMAGES_FOLDER_NAME, CREATE_NEW_IMAGE_FOLDER_BUTTON,
 	ADD_IMAGE_MODAL_BUTTON, ADD_IMAGE_BY_LINK_BUTTON,
 	IMAGE_BY_LINK_URL_INPUT, IMPORT_IMAGE_BUTTON,
-	IMAGE_UPLOAD_TRACKER, LAST_UPLOADED_IMAGE,
-	IMAGE_NAME, ADD_IMAGE_TO_INFO_BUTTON, NEW_IMAGE_FOLDER_NAME_INPUT,
+	IMAGE_UPLOAD_TRACKER, IMAGE_NAME, IMAGE_NAME_INPUT,
+	ADD_IMAGE_TO_INFO_BUTTON, NEW_IMAGE_FOLDER_NAME_INPUT,
 } = WIX_SELECTORS;
+
+const { KEYBOARD, MOUSE } = EVENTS;
+
 
 class ImagesUploader {
 	#uploadedCategoryName;
 	#imageLink;
-	#frame = document.querySelector(PHOTO_GALLERY_FRAME);
+	#imageName;
+	#galleryFrame;
 	
-	constructor() {
-		console.log("CREATED 'ImagesUploader' CLASS INSTANCE");
+	#clickGalleryElement(selector) {
+		clickElement(selector, this.#galleryFrame);
 	}
 	
-	setParams({ imageLink, categoryName }) {
+	async #awaitGalleryElementAppear(selector) {
+		await awaitElementAppear(selector, this.#galleryFrame);
+	}
+	
+	#setGalleryElementValue(selector, value, options = {}) {
+		setValue(selector, value, options, this.#galleryFrame)
+	}
+	
+	setParams({ imageLink, categoryName, imageName }) {
 		this.#imageLink = imageLink;
 		this.#uploadedCategoryName = categoryName;
-	}
-	
-	#setImageName() {
-		document.querySelector(LAST_UPLOADED_IMAGE).querySelector(IMAGE_NAME).innerHTML = this.#imageLink;
+		this.#imageName = imageName;
 	}
 	
 	async #awaitUploadComplete() {
-		return new Promise(resolve => {
+		return await new Promise(resolve => {
 			let timerId;
 			const tracker = () => {
-				const uploadText = document.querySelector(IMAGE_UPLOAD_TRACKER)?.textContent;
-				if (uploadText === 'Не удалось загрузить' || uploadText.match('из 1')) {
+				const uploadText = this.#galleryFrame.querySelector(IMAGE_UPLOAD_TRACKER)?.textContent;
+				if (['Не удалось загрузить', 'Загружено 1'].includes(uploadText)) {
 					clearTimeout(timerId);
 					resolve();
 				} else {
 					timerId = setTimeout(tracker, 500);
 				}
 			};
+			tracker();
 		});
 	}
 	
 	async #getCategoryImagesFolder() {
-		log('obtaining category images folder');
-		let categoryFolder = document.querySelectorAll(IMAGES_FOLDERS).find(node => (
-			node.querySelector(IMAGES_FOLDER_NAME).textContent === this.#uploadedCategoryName
-		));
-		log('search for category folder result');
-		console.log(categoryFolder);
-		if (!categoryFolder) {
-			categoryFolder = await this.#createCategoryImagesFolder();
+		let categoryFolder;
+		this.#galleryFrame.querySelectorAll(IMAGES_FOLDERS).forEach(node => {
+			if (node.querySelector(IMAGES_FOLDER_NAME).textContent === this.#uploadedCategoryName) {
+				categoryFolder = node;
+			}
+		});
+		if (categoryFolder) {
+			return categoryFolder;
 		}
-		return categoryFolder;
+		await this.#createCategoryImagesFolder();
+		return this.#getCategoryImagesFolder();
 	};
 	
 	async #createCategoryImagesFolder() {
+		await this.#awaitGalleryElementAppear(CREATE_NEW_IMAGE_FOLDER_BUTTON);
 		log('creating category images folder');
-		clickElement(CREATE_NEW_IMAGE_FOLDER_BUTTON);
-		setValue(NEW_IMAGE_FOLDER_NAME_INPUT, this.#uploadedCategoryName);
-		window.dispatchEvent(new KeyboardEvent('keydown', {
-		
-		}));
+		this.#clickGalleryElement(CREATE_NEW_IMAGE_FOLDER_BUTTON);
+		await this.#awaitGalleryElementAppear(NEW_IMAGE_FOLDER_NAME_INPUT);
+		this.#setGalleryElementValue(NEW_IMAGE_FOLDER_NAME_INPUT, this.#uploadedCategoryName);
+		await makeBreak(2);
+		this.#galleryFrame.querySelector(NEW_IMAGE_FOLDER_NAME_INPUT).dispatchEvent(KEYBOARD.ENTER);
 	};
 	
 	async addItemPhoto() {
-		log('clicking ADD_IMAGE_BUTTON');
 		clickElement(ADD_IMAGE_BUTTON);
-		log('waiting for appear of IMAGES_FOLDERS_LIST');
 		await makeBreak(5);
-		await awaitElementAppear(IMAGES_FOLDERS_LIST);
+		await awaitElementAppear(PHOTO_GALLERY_FRAME);
+		this.#galleryFrame = document.querySelector(PHOTO_GALLERY_FRAME).contentDocument;
+		await this.#awaitGalleryElementAppear(IMAGES_FOLDERS_LIST);
+		log("OBTAINING CATEGORY IMAGES FOLDER");
 		const categoryImagesFolder = await this.#getCategoryImagesFolder();
-		
-		categoryImagesFolder.dispatchEvent(
-			new MouseEvent('dblclick', {
-				'view': window,
-				'bubbles': true,
-				'cancelable': true
-			})
-		);
+		log("CATEGORY FOLDER");
+		categoryImagesFolder.dispatchEvent(MOUSE.DOUBLE_CLICK);
 		await this.#uploadPhoto();
+		this.#clickGalleryElement(ADD_IMAGE_TO_INFO_BUTTON);
 	};
 	
 	async #uploadPhoto() {
-		clickElement(ADD_IMAGE_MODAL_BUTTON);
-		clickElement(ADD_IMAGE_BY_LINK_BUTTON);
-		setValue(IMAGE_BY_LINK_URL_INPUT, this.#imageLink);
-		clickElement(IMPORT_IMAGE_BUTTON);
+		await this.#awaitGalleryElementAppear(ADD_IMAGE_MODAL_BUTTON);
+		this.#clickGalleryElement(ADD_IMAGE_MODAL_BUTTON);
+		this.#clickGalleryElement(ADD_IMAGE_BY_LINK_BUTTON);
+		this.#setGalleryElementValue(IMAGE_BY_LINK_URL_INPUT, this.#imageLink, { emulatedEvent: ['focus', 'change'] });
+		this.#clickGalleryElement(IMPORT_IMAGE_BUTTON);
 		await this.#awaitUploadComplete();
-		this.#setImageName();
-		clickElement(ADD_IMAGE_TO_INFO_BUTTON);
+		// TODO: установка имени изображения
+		this.#galleryFrame.querySelector(IMAGE_NAME).dispatchEvent(MOUSE.CLICK);
+		await this.#awaitGalleryElementAppear(IMAGE_NAME_INPUT);
+		this.#setGalleryElementValue(IMAGE_NAME_INPUT, this.#imageName);
+		this.#galleryFrame.querySelector(IMAGE_NAME_INPUT).dispatchEvent(KEYBOARD.ENTER);
 	};
 }
 
