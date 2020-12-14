@@ -1,4 +1,4 @@
-import { awaitElementAppear, makeBreak, clickElement, trackPropertyChange, setValue, log } from '../utils';
+import { awaitElementAppear, makeBreak, clickElement, setValue } from '../utils';
 import { WIX_SELECTORS, EVENTS } from '../constants';
 
 
@@ -14,7 +14,7 @@ const {
 const { KEYBOARD, MOUSE } = EVENTS;
 
 
-class ImagesUploader {
+export default class ImagesUploader {
 	#uploadedCategoryName;
 	#imageLink;
 	#imageName;
@@ -70,7 +70,6 @@ class ImagesUploader {
 	
 	async #createCategoryImagesFolder() {
 		await this.#awaitGalleryElementAppear(CREATE_NEW_IMAGE_FOLDER_BUTTON);
-		log('creating category images folder');
 		this.#clickGalleryElement(CREATE_NEW_IMAGE_FOLDER_BUTTON);
 		await this.#awaitGalleryElementAppear(NEW_IMAGE_FOLDER_NAME_INPUT);
 		this.#setGalleryElementValue(NEW_IMAGE_FOLDER_NAME_INPUT, this.#uploadedCategoryName);
@@ -84,11 +83,11 @@ class ImagesUploader {
 		await awaitElementAppear(PHOTO_GALLERY_FRAME);
 		this.#galleryFrame = document.querySelector(PHOTO_GALLERY_FRAME).contentDocument;
 		await this.#awaitGalleryElementAppear(IMAGES_FOLDERS_LIST);
-		log("OBTAINING CATEGORY IMAGES FOLDER");
 		const categoryImagesFolder = await this.#getCategoryImagesFolder();
-		log("CATEGORY FOLDER");
 		categoryImagesFolder.dispatchEvent(MOUSE.DOUBLE_CLICK);
 		await this.#uploadPhoto();
+		this.#galleryFrame.querySelector(IMAGE_NAME).dispatchEvent(MOUSE.CLICK);
+		await makeBreak(2);
 		this.#clickGalleryElement(ADD_IMAGE_TO_INFO_BUTTON);
 	};
 	
@@ -99,12 +98,9 @@ class ImagesUploader {
 		this.#setGalleryElementValue(IMAGE_BY_LINK_URL_INPUT, this.#imageLink, { emulatedEvent: ['focus', 'change'] });
 		this.#clickGalleryElement(IMPORT_IMAGE_BUTTON);
 		await this.#awaitUploadComplete();
-		// TODO: установка имени изображения
 		this.#galleryFrame.querySelector(IMAGE_NAME).dispatchEvent(MOUSE.CLICK);
 		await this.#awaitGalleryElementAppear(IMAGE_NAME_INPUT);
 		this.#setGalleryElementValue(IMAGE_NAME_INPUT, this.#imageName);
 		this.#galleryFrame.querySelector(IMAGE_NAME_INPUT).dispatchEvent(KEYBOARD.ENTER);
 	};
 }
-
-export default new ImagesUploader();

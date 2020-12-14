@@ -1,8 +1,7 @@
 import {MESSAGES, ITEMS_TYPES_SELECTORS, WIX_SELECTORS} from '../constants';
 import { getInfoFromRoute } from './routeProcessor';
-import { uploadItemsCategory } from './itemUploader';
+import itemsUploader from './itemsUploader';
 import { clickElement, makeTimestamp } from '../utils';
-
 
 chrome.runtime.onMessage.addListener(async ({ type, info }, sender, sendResponse) => {
 	switch (type) {
@@ -21,7 +20,7 @@ chrome.runtime.onMessage.addListener(async ({ type, info }, sender, sendResponse
 			sendResponse();
 			break;
 		case MESSAGES.UPLOAD_ITEMS_INFO:
-			await uploadItemsCategory(info);
+			await itemsUploader.uploadItemsCategory(info);
 			sendResponse();
 			break;
 	}

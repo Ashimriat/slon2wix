@@ -30,6 +30,14 @@ export const COFFEE_COOK_CATEGORIES = {
 	'Чашка': 'cup'
 };
 
+export const COFFEE_COOK_INFO_TYPES = {
+	espresso: 'Эспрессо',
+	turk: 'Турка',
+	filter: 'Фильтр',
+	frenchPress: 'Френч-пресс',
+	cup: 'Чашка'
+};
+
 export const COFFEE_COOK_CATEGORIES_REGEXP = /(Эспрессо|Турка|Фильтр|Френч-пресс|Чашка)/;
 
 export const ITEMS_TYPES_SELECTORS = {
@@ -48,10 +56,18 @@ export const SECTIONS_NAMES = {
 export const COFFEE_INFO_CATEGORIES = {
 	'Способ обработки кофейных зерен': 'processing',
 	'Степень обжарки': 'roast',
-	'Кислотность напитка по шкале от 0 до 5': 'toxicity'
+	'Кислотность напитка по шкале от 0 до 5': 'toxicity',
+	'Способ приготовления': 'howToCook'
 };
 
-export const COFFEE_INFO_CATEGORIES_REGEXP = /(Способ обработки кофейных зерен|Степень обжарки|Кислотность напитка по шкале от 0 до 5)/;
+export const COFFEE_ADDITIONAL_INFO_TYPES = {
+	processing: 'Способ обработки кофейных зерен',
+	roast: 'Степень обжарки',
+	toxicity: 'Кислотность напитка по шкале от 0 до 5',
+	howToCook: 'Способ приготовления'
+};
+
+export const COFFEE_INFO_CATEGORIES_REGEXP = /(Способ обработки кофейных зерен|Степень обжарки|Степень обжарки кофейных зерен|Кислотность напитка по шкале от 0 до 5)/;
 
 export const SWEETS_INFO_CATEGORIES_REGEXP = /(Состав|Условия хранения)/;
 

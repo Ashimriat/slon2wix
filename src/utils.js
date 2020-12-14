@@ -22,7 +22,6 @@ export const getLastModifyDate = async () => await new Promise(resolve => {
 const elementTrack = async (selector, appearCheck, contextDocument = document) => await new Promise(resolve => {
 	let timerId;
 	const tracker = async () => {
-		console.log("TRACKING", selector);
 		let condition = contextDocument.querySelector(selector);
 		if (!appearCheck) condition = !condition;
 		if (!condition) {
@@ -41,7 +40,6 @@ export const awaitElementAppear = async (selector, contextDocument) => await ele
 export const awaitElementDisappear = async (selector, contextDocument) => await elementTrack(selector, false, contextDocument);
 
 export const clickElement = (selector, contextDocument = document) => {
-	console.log(contextDocument.querySelector(selector));
 	contextDocument.querySelector(selector).click();
 };
 
@@ -59,7 +57,9 @@ export const setValue = (selector, value, options, contextDocument = document) =
 	const isFormElement = ['INPUT', 'TEXTAREA'].includes(element.tagName);
 	const propertyToSet = isFormElement ? 'value' : 'innerHTML';
 	element[propertyToSet] = value;
-	if (isFormElement) {
+	if (options?.emulatedButtonSelector) {
+		clickElement(options.emulatedButtonSelector);
+	} else if (isFormElement) {
 		let events = ['change'];
 		if (options?.emulatedEvent) {
 			events = Array.isArray(options.emulatedEvent) ? options.emulatedEvent : [options.emulatedEvent];
@@ -72,9 +72,7 @@ export const setValue = (selector, value, options, contextDocument = document) =
 			}));
 		}
 	}
-	if (options?.emulatedButtonSelector) {
-		clickElement(options.emulatedButtonSelector);
-	}
+	
 };
 
 export const log = message => console.log(`[${makeTimestamp()}]: ${message}`);
@@ -82,7 +80,6 @@ export const log = message => console.log(`[${makeTimestamp()}]: ${message}`);
 export const makeBreak = async secondsAmount => await new Promise(resolve => {
 	let counter = 1;
 	let timerId = setInterval(() => {
-		log(`Break moment: ${counter}`);
 		counter++;
 		if (counter > secondsAmount) {
 			clearInterval(timerId);
