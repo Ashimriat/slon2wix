@@ -30,14 +30,13 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.pageAction.onClicked.addListener(async tab => {
 	const { url } = tab;
 	chrome.pageAction.hide(tab.id);
-	if (url.match(HOST.SLON)) {
-		fileData = JSON.parse(localStorage.getItem('itemsData'));
-		if (!fileData) {
-			fileData = await obtainProductsInfo();
-			localStorage.setItem('itemsData', JSON.stringify(fileData));
-		}
-		console.log("GOT DATA", fileData);
+	fileData = JSON.parse(localStorage.getItem('itemsData'));
+	if (!fileData) {
+		fileData = await obtainProductsInfo();
+		localStorage.setItem('itemsData', JSON.stringify(fileData));
 	} else if (url.match(HOST.WIX)) {
+		// TODO: обновление информации об измененных товарах
+		// TODO: посмотреть на wix чтобы изменялась цена в зависимости от товаров
 		await uploadInfo(tab.id, fileData);
 	}
 });

@@ -1,5 +1,7 @@
 import { STORAGE_KEYS } from "./constants";
 
+// open -na Google\ Chrome --args --user-data-dir=/tmp/temporary-chrome-profile-dir --disable-web-security --disable-site-isolation-trials
+
 export const trackPromise = async (trackedPromiseObj) => await new Promise(resolve => {
 	let timerId;
 	const tracker = () => {

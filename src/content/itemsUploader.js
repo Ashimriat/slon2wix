@@ -1,5 +1,11 @@
-import { WIX_SELECTORS, COFFEE_ADDITIONAL_INFO_TYPES, COFFEE_COOK_INFO_TYPES } from '../constants';
-import { awaitElementAppear, awaitElementDisappear, clickElement, setValue, makeBreak } from '../utils';
+import {
+	WIX_SELECTORS, ADDITIONAL_INFO_TYPES,
+	COFFEE_COOK_INFO_TYPES, EVENTS
+} from '../constants';
+import {
+	awaitElementAppear, awaitElementDisappear,
+	clickElement, setValue, makeBreak
+} from '../utils';
 import ImagesUploader from './imagesUploader';
 
 
@@ -11,11 +17,27 @@ const {
 	PRODUCT_PRICE_INPUT, ADDITIONAL_PRICE_INFO_INPUT,
 	TOTAL_AMOUNT_INPUT, TOTAL_AMOUNT_TYPE_INPUT, KILO_OPTION,
 	BASE_AMOUNT_INPUT, BASE_AMOUNT_TYPE_INPUT, GRAM_OPTION,
-	ADD_ITEM
+	VENDOR_CODE_INPUT, ADD_PARAMS_BUTTON, ADD_PARAMS_PARAM_NAME_INPUT,
+	ADD_PARAMS_WEIGHTS_OPTION, ADD_PARAMS_WEIGHTS_RANGE_INPUT, ADD_PARAMS_SAVE_BUTTON,
+	EDIT_PARAMS_BUTTON, EDIT_PARAMS_MODAL, EDIT_PARAMS_MODAL_TABLE_ROW,
+	EDIT_PARAMS_OVERPRICE_INPUT, EDIT_PARAMS_VENDOR_CODE_INPUT, EDIT_PARAMS_WEIGHT_INPUT,
+	EDIT_PARAMS_SAVE_BUTTON
 } = WIX_SELECTORS;
 
 class ItemsUploader {
 	#imagesUploader = new ImagesUploader();
+	
+	static #getSortedWeights(priceObj) {
+		const priceKeys = Object.keys(priceObj);
+		const kiloPriceIndex = priceKeys.findIndex(weight => weight === '1кг');
+		if (kiloPriceIndex !== -1) priceKeys.splice(kiloPriceIndex, 1);
+		const sortedWeights = priceKeys.sort((a, b) => (
+			+a.match(/\d+/)[0] - +b.match(/\d+/)[0]
+		));
+		if (kiloPriceIndex !== -1) sortedWeights.push('1кг');
+		return sortedWeights;
+	};
+	
 	
 	#getPrice(priceObj) {
 		const itemAmounts = Object.keys(priceObj);
@@ -57,12 +79,44 @@ class ItemsUploader {
 		clickElement(baseAmountType);
 	};
 	
+	async #editParams(price, vendorCode) {
+		await awaitElementAppear(EDIT_PARAMS_BUTTON);
+		clickElement(EDIT_PARAMS_BUTTON);
+		await awaitElementAppear(EDIT_PARAMS_MODAL);
+		const rows = document.querySelectorAll(EDIT_PARAMS_MODAL_TABLE_ROW);
+		let tmpRow, tmpWeightNumMatch, tmpMinPrice, tmpOverprice, tmpVendorCode, tmpWeight;
+		ItemsUploader.#getSortedWeights(price).forEach((weight, index, arr) => {
+			tmpRow = rows[index];
+			tmpWeightNumMatch = +weight.match(/\d+/)[0];
+			if (index === 0) tmpMinPrice = price[weight];
+			tmpOverprice = index === 0 ? 0 : price[weight] - tmpMinPrice;
+			tmpVendorCode = index === arr.length - 1 ? vendorCode : `${vendorCode}/${tmpWeightNumMatch}`;
+			tmpWeight = index === arr.length - 1 ? 1 : tmpWeightNumMatch / 1000;
+			setValue(EDIT_PARAMS_OVERPRICE_INPUT, tmpOverprice, {}, tmpRow);
+			setValue(EDIT_PARAMS_VENDOR_CODE_INPUT, tmpVendorCode, {}, tmpRow);
+			setValue(EDIT_PARAMS_WEIGHT_INPUT, tmpWeight, {}, tmpRow);
+		});
+		clickElement(EDIT_PARAMS_SAVE_BUTTON);
+	}
+	
+	async #setParams(price) {
+		// Добавляем данные об упаковках
+		clickElement(ADD_PARAMS_BUTTON);
+		await awaitElementAppear(ADD_PARAMS_PARAM_NAME_INPUT);
+		clickElement(ADD_PARAMS_PARAM_NAME_INPUT);
+		clickElement(ADD_PARAMS_WEIGHTS_OPTION);
+		ItemsUploader.#getSortedWeights(price).forEach(weight => {
+			setValue(ADD_PARAMS_WEIGHTS_RANGE_INPUT, weight);
+			document.querySelector(ADD_PARAMS_WEIGHTS_RANGE_INPUT).dispatchEvent(EVENTS.KEYBOARD.COMMA);
+		});
+		clickElement(ADD_PARAMS_SAVE_BUTTON);
+	}
 	
 	async #setAdditionalInfo(infoType, infoContent) {
 		clickElement(ADDITIONAL_INFO_BUTTON);
 		await awaitElementAppear(ADDITIONAL_INFO_TITLE);
 		setValue(ADDITIONAL_INFO_TITLE, infoType);
-		const descriptionValue = infoType === COFFEE_ADDITIONAL_INFO_TYPES.howToCook ?
+		const descriptionValue = infoType === ADDITIONAL_INFO_TYPES.howToCook ?
 			this.#getHowToCookInfo(infoContent) :
 			infoContent;
 		setValue(ADDITIONAL_INFO_DESCRIPTION, descriptionValue, { emulatedButtonSelector: ADDITIONAL_INFO_DESCRIPTION_BOLD_BUTTON });
@@ -73,7 +127,7 @@ class ItemsUploader {
 	}
 	
 	async #processAdditionalInfo(itemInfo) {
-		const { howToCook, toxicity, roast, processing } = itemInfo;
+		const { howToCook, toxicity, roast, processing, compound } = itemInfo;
 		const processedInfoTypes = [];
 		if (howToCook && Object.keys(howToCook).length) {
 			processedInfoTypes.push('howToCook');
@@ -81,36 +135,33 @@ class ItemsUploader {
 		if (toxicity) processedInfoTypes.push('toxicity');
 		if (roast) processedInfoTypes.push('roast');
 		if (processing) processedInfoTypes.push('processing');
+		if (compound) processedInfoTypes.push('compound');
 		for (let type of processedInfoTypes) {
-			await this.#setAdditionalInfo(COFFEE_ADDITIONAL_INFO_TYPES[type], itemInfo[type]);
+			await this.#setAdditionalInfo(ADDITIONAL_INFO_TYPES[type], itemInfo[type]);
 		}
 	}
 	
-	#setCategories(itemInfo, categoryName, itemType) {
-	
-	}
-	
-	async #uploadItemInfo(itemInfo, categoryName, itemType) {
-		const { description, imageLink, name, price, weight } = itemInfo;
+	async uploadItemInfo(itemInfo, categoryName, itemType) {
+		const { description, imageLink, name, vendorCode, price, weight } = itemInfo;
 		setValue(PRODUCT_NAME_INPUT, name);
 		setValue(PRODUCT_DESCRIPTION_INPUT, description, { emulatedButtonSelector: PRODUCT_DESCRIPTION_BOLD_BUTTON });
-		this.#setPriceAndWeight(price, weight);
+		if (Object.keys(price).length > 1) {
+			const minPriceWeight = ItemsUploader.#getSortedWeights(price)[0];
+			setValue(PRODUCT_PRICE_INPUT, price[minPriceWeight]);
+			await this.#setParams(price);
+			await this.#editParams(price, vendorCode);
+		} else {
+			this.#setPriceAndWeight(price, weight);
+			setValue(VENDOR_CODE_INPUT, vendorCode)
+		}
 		await this.#processAdditionalInfo(itemInfo);
-		this.#imagesUploader.setParams({ imageLink, categoryName, imageName: name });
-		await this.#imagesUploader.addItemPhoto(imageLink, categoryName);
-		this.#setCategories(itemInfo, categoryName, itemType);
+		if (imageLink) {
+			this.#imagesUploader.setParams({ imageLink, categoryName, imageName: name });
+			await this.#imagesUploader.addItemPhoto(imageLink, categoryName);
+		}
 		await makeBreak(5);
 		clickElement(SAVE_ITEM_INFO_BUTTON);
-		await awaitElementAppear(ADD_ITEM);
-	};
-	
-	async uploadItemsCategory({ itemType, name, items }) {
-		await awaitElementAppear(PRODUCT_NAME_INPUT);
-		// for (let item in items) {
-			await this.#uploadItemInfo(items[5], name, itemType);
-		//}
 	};
 }
-
 
 export default new ItemsUploader();

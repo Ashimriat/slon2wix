@@ -6,6 +6,7 @@ let fileData,
 	tmpItem,
 	tmpCategoryIndex = 0,
 	tmpItemIndex = 0,
+	tmpDeletedItemsIndexes,
 	USED_TAB_ID,
 	itemInfoObtainingPromiseObj = { prom: null },
 	PAGE_CONTENT_SCRIPT_ALLOWANCE = false;
@@ -32,6 +33,9 @@ const getItemInfo = async (item) => await new Promise(resolve => {
 		// если дошли до последнего итема в категории
 		if (tmpItemIndex === fileData[tmpCategoryIndex].items.length) {
 			tmpItemIndex = 0;
+			tmpDeletedItemsIndexes.forEach(index => {
+				fileData[tmpCategoryIndex].items.splice(index, 1);
+			});
 			tmpCategoryIndex++;
 			// если это была последняя категория - все закончилось
 			if (tmpCategoryIndex === fileData.length) {
@@ -48,7 +52,7 @@ const obtainInfoTabUpdatedListener = (tabId, tabInfo) => {
 			chrome.tabs.executeScript(tabId, { file: 'content.js' }, () => {
 				chrome.tabs.sendMessage(USED_TAB_ID, { type: MESSAGES.OBTAIN_ITEM_INFO }, ({ info }) => {
 					if (info === 'error') {
-						fileData[tmpCategoryIndex].items.splice(tmpItemIndex, 1);
+						tmpDeletedItemsIndexes.push(tmpItemIndex);
 					} else {
 						tmpItem = Object.assign({}, tmpItem, info);
 						delete tmpItem.link;
@@ -70,6 +74,7 @@ const startInfoParsing = async () => await new Promise(resolve => {
 		chrome.tabs.onUpdated.addListener(obtainInfoTabUpdatedListener);
 		// перебираем категории
 		for (let category of fileData) {
+			tmpDeletedItemsIndexes = [];
 			// перебираем итемы
 			for (let item of category.items) {
 				await getItemInfo(item);

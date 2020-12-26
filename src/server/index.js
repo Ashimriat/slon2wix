@@ -7,8 +7,8 @@ const {
 } = require('./constants');
 
 
-
 const WORKBOOK_OPERATOR = new ExcelJS.Workbook();
+
 const getPricesForm = (worksheet) => {
 	const headInfoRow = worksheet.getRow(7);
 	// Цена начинается в 4 колонке
@@ -37,6 +37,7 @@ const getPricesForm = (worksheet) => {
 	
 	return res;
 };
+
 const getPrices = (pricesForm, itemRow) => {
 	let res = {},
 		tmpCellIndex = 4,
@@ -44,12 +45,12 @@ const getPrices = (pricesForm, itemRow) => {
 	if (pricesForm.length > 1) {
 		pricesForm.forEach(form => {
 			price = itemRow.getCell(tmpCellIndex).value;
+			tmpCellIndex++;
 			if (!price) return;
 			if (typeof price === 'object') {
 				price = price.result;
 			}
 			res[form] = price;
-			tmpCellIndex++;
 		});
 	} else {
 		res = {
@@ -58,6 +59,7 @@ const getPrices = (pricesForm, itemRow) => {
 	}
 	return res;
 };
+
 const parseFile = async (filePath) => {
 	const workbook = await WORKBOOK_OPERATOR.xlsx.readFile(filePath);
 	const res = [];
@@ -94,7 +96,6 @@ const parseFile = async (filePath) => {
 			}
 		});
 	});
-	
 	return res;
 };
 
@@ -110,7 +111,6 @@ http.createServer(async (request, response) => {
 			fs.stat(filePath, async (e, stats) => {
 				// TODO: сверка даты последнего обновления у сервака с тем, что есть в хранилище на фронте
 				let data = {};
-				console.log(dateData);
 				if (stats.mtimeMs) {
 					const info = await parseFile(filePath);
 					data.status = 'new';

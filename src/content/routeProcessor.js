@@ -210,7 +210,6 @@ const obtainTablewareInfo = () => {
 };
 
 const obtainSweetsInfo = () => {
-	// TODO: отладить, не везде подхватывает описание
 	const res = getBaseInfo();
 	
 	const descriptionNode = document.querySelector(ITEMS_TYPES_SELECTORS.description);
@@ -218,7 +217,7 @@ const obtainSweetsInfo = () => {
 	if (descriptionNode.childElementCount) {
 		let tmpNode = descriptionNode.firstElementChild;
 		let isDescriptionEnded = false;
-		let tmpNodeText, tmpMatch;
+		let tmpNodeText, tmpMatch, tmpText;
 		
 		const descriptionTexts = [];
 		
@@ -226,9 +225,16 @@ const obtainSweetsInfo = () => {
 			tmpNode = tmpNode.nextElementSibling;
 			tmpNodeText = tmpNode.textContent;
 			tmpMatch = tmpNodeText.match(SWEETS_INFO_CATEGORIES_REGEXP);
-			if (tmpMatch || tmpNode === descriptionNode.lastElementChild) {
+			if (tmpMatch) {
+				if (tmpMatch[0] === 'Состав') {
+					tmpText = tmpNodeText.replace('Состав: ', '');
+					res.compound = tmpText.charAt(0).toUpperCase() + tmpText.substring(1);
+				} else {
+					isDescriptionEnded = true;
+				}
+			} else if (tmpNode === descriptionNode.lastElementChild) {
 				isDescriptionEnded = true;
-			} else {
+			} else if (!tmpNodeText.match(/\d+.+/)) {
 				descriptionTexts.push(tmpNodeText);
 			}
 		}

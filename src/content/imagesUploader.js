@@ -86,9 +86,8 @@ export default class ImagesUploader {
 		const categoryImagesFolder = await this.#getCategoryImagesFolder();
 		categoryImagesFolder.dispatchEvent(MOUSE.DOUBLE_CLICK);
 		await this.#uploadPhoto();
-		this.#galleryFrame.querySelector(IMAGE_NAME).dispatchEvent(MOUSE.CLICK);
-		await makeBreak(2);
 		this.#clickGalleryElement(ADD_IMAGE_TO_INFO_BUTTON);
+		await makeBreak(5);
 	};
 	
 	async #uploadPhoto() {
