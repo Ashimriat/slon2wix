@@ -143,6 +143,7 @@ class ItemsUploader {
 	
 	async uploadItemInfo(itemInfo, categoryName, itemType) {
 		const { description, imageLink, name, vendorCode, price, weight } = itemInfo;
+		// TODO: в этом инпуте ограничение по длине ввода
 		setValue(PRODUCT_NAME_INPUT, name);
 		setValue(PRODUCT_DESCRIPTION_INPUT, description, { emulatedButtonSelector: PRODUCT_DESCRIPTION_BOLD_BUTTON });
 		if (Object.keys(price).length > 1) {
